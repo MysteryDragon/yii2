@@ -201,6 +201,14 @@ abstract class ManagerTestCase extends TestCase
                 $this->assertEquals($result, $this->auth->checkAccess($user, $permission, $params), "Checking $user can $permission");
             }
         }
+
+        // for now <author B> can deletePost, as we checked before
+        // but we will fix that
+        $deletePost = $this->auth->getPermission('deletePost');
+        $this->auth->revoke($deletePost, 'author B');
+
+        // now he can't, because we shouldn't cache assignments
+        $this->assertFalse($this->auth->checkAccess('author B', $deletePost->name, $params), 'Checking we are not caching user assignments');
     }
 
     protected function prepareData()
