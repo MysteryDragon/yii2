@@ -13,7 +13,7 @@ Il est le plus adapté à l'affichage d'un modèle dans un format courant (p. ex
 
 *DetailView* utilise la propriété [[yii\widgets\DetailView::$attributes|$attributes]] pour déterminer quels attributs du modèle doivent être affichés et comment ils doivent être formatés. Reportez-vous à la section [formatage des données](output-formatting.md) pour des informations sur les options de formatage.
 
-Une utilisation typique de *DetailView* ressemble à ce qui suit : 
+Une utilisation typique de *DetailView* ressemble à ce qui suit :
 
 ```php
 echo DetailView::widget([
@@ -53,7 +53,7 @@ echo ListView::widget([
 ]);
 ```
 
-Le fichier de vue,  `_post`, contient ce qui suit : 
+Le fichier de vue,  `_post`, contient ce qui suit :
 
 ```php
 <?php
@@ -87,7 +87,7 @@ echo ListView::widget([
 ]);
 ```
 
-Celles-ci sont alors disponibles aussi dans la vue en tant que variables. 
+Celles-ci sont alors disponibles aussi dans la vue en tant que variables.
 
 
 Vue en grille (classe *GridView*)<a name="grid-view"></a>
@@ -114,12 +114,12 @@ echo GridView::widget([
 ]);
 ```
 
-Le code précédent crée un fournisseur de données, puis utilise le composant *GridView* pour afficher chacun des attributs dans une ligne en le prélevant dans le fournisseur de données. La grille affichée est doté de fonctionnalités de pagination et de tri sans autre intervention. 
+Le code précédent crée un fournisseur de données, puis utilise le composant *GridView* pour afficher chacun des attributs dans une ligne en le prélevant dans le fournisseur de données. La grille affichée est doté de fonctionnalités de pagination et de tri sans autre intervention.
 
 
 ### Colonnes de la grille
 
-Les colonnes de la grille sont exprimées en terme de classe [[yii\grid\Column]], qui sont configurées dans la propriété [[yii\grid\GridView::columns|columns]] (colonnes) de la configuration du composant *GridView*. En fonction du type de colonne et des réglages, celles-ci sont en mesure de présenter les données différemment. La classe par défaut est [[yii\grid\DataColumn]] (colonne de données), qui représente un attribut de modèle et peut être triée et filtrée. 
+Les colonnes de la grille sont exprimées en terme de classe [[yii\grid\Column]], qui sont configurées dans la propriété [[yii\grid\GridView::columns|columns]] (colonnes) de la configuration du composant *GridView*. En fonction du type de colonne et des réglages, celles-ci sont en mesure de présenter les données différemment. La classe par défaut est [[yii\grid\DataColumn]] (colonne de données), qui représente un attribut de modèle et peut être triée et filtrée.
 
 ```php
 echo GridView::widget([
@@ -146,7 +146,7 @@ Notez que si la partie [[yii\grid\GridView::columns|columns]] de la configuratio
 
 ### Classes de colonne
 
-Les colonnes du composant *GridView* peuvent être personnalisées en utilisant différentes classes de colonnes : 
+Les colonnes du composant *GridView* peuvent être personnalisées en utilisant différentes classes de colonnes :
 
 ```php
 echo GridView::widget([
@@ -158,7 +158,7 @@ echo GridView::widget([
         ],
 ```
 
-En plus des classes de colonne fournies par Yii que nous allons passer en revue ci-après, vous pouvez créer vos propres classes de colonne. 
+En plus des classes de colonne fournies par Yii que nous allons passer en revue ci-après, vous pouvez créer vos propres classes de colonne.
 
 Chacune des classes de colonne étend la classe [[yii\grid\Column]] afin que quelques options communes soient disponibles lors de la configuration des colonnes.
 
@@ -211,7 +211,7 @@ Pour configurer des colonnes de données, il y a aussi un format raccourci qui e
 
 #### Colonne d'actions (*ActionColumn*)
 
-La classe [[yii\grid\ActionColumn|ActionColumn]] (colonne d'action) affiche des boutons d'action tels que mise à jour ou supprimer pour chacune des lignes. 
+La classe [[yii\grid\ActionColumn|ActionColumn]] (colonne d'action) affiche des boutons d'action tels que mise à jour ou supprimer pour chacune des lignes.
 
 ```php
 echo GridView::widget([
@@ -225,7 +225,7 @@ echo GridView::widget([
 
 Les propriétés additionnelles configurables sont :
 
-- [[yii\grid\ActionColumn::controller|controller]] qui est l'identifiant du contrôleur qui prend en charge l'action. Si cette propriété n'est pas définie, le contrôleur courant est utilisé. 
+- [[yii\grid\ActionColumn::controller|controller]] qui est l'identifiant du contrôleur qui prend en charge l'action. Si cette propriété n'est pas définie, le contrôleur courant est utilisé.
 - [[yii\grid\ActionColumn::template|template]] qui définit le modèle utilisé pour composer chacune des cellules dans la colonne d'actions. Les marqueurs (textes à l'intérieur d'accolades) sont traités comme des identifiants d'action (aussi appelé *noms de bouton* dans le contexte d'une colonne d'actions. Il sont remplacés par les fonctions de rappel correspondantes spécifiées dans la propriété [[yii\grid\ActionColumn::$buttons|buttons]]. Par exemple, le marqueur `{view}` sera remplacé par le résultat de la fonction de rappel `buttons['view']`. Si une fonction de rappel n'est pas trouvée, le texte est remplacé par une chaîne vide. Les marqueurs par défaut sont `{view} {update} et {delete}`.
 - [[yii\grid\ActionColumn::buttons|buttons]] est un tableau de fonctions de rappel pour le rendu des boutons. Les clés du tableau sont les noms des boutons (sans les accolades), et les valeurs sont les fonctions de rappel de rendu des boutons. Les fonctions de rappel ont la signature suivante :
 
@@ -276,7 +276,7 @@ L'utilisateur peut cliquer sur les boîtes à cocher pour sélectionner des lign
 
 ```javascript
 var keys = $('#grid').yiiGridView('getSelectedRows');
-// keys est un tableau constitué des clés associées aux lignes sélectionnées. 
+// keys est un tableau constitué des clés associées aux lignes sélectionnées.
 
 ```
 
@@ -297,7 +297,7 @@ echo GridView::widget([
 
 ### Tri des données
 
-> Note: cette section est en cours de développement. 
+> Note: cette section est en cours de développement.
 >
 > - https://github.com/yiisoft/yii2/issues/1576
 
@@ -341,12 +341,12 @@ class PostSearch extends Post
             'query' => $query,
         ]);
 
-        // charge les données du formulaire de recherche et valide 
+        // charge les données du formulaire de recherche et valide
         if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
         }
 
-        // ajuste la requête en ajoutant les filtres 
+        // ajuste la requête en ajoutant les filtres
         $query->andFilterWhere(['id' => $this->id]);
         $query->andFilterWhere(['like', 'title', $this->title])
               ->andFilterWhere(['like', 'creation_date', $this->creation_date]);
@@ -384,7 +384,7 @@ echo GridView::widget([
 
 ### Formulaire de filtrage séparé
 
-La plupart du temps, utiliser les filtres de l'entête de la vue en grille suffit, mais dans le cas où vous avez besoin d'un formulaire de filtrage séparé, vous pouvez facilement l'ajouter aussi. Vous pouvez créer une vue partielle `_search.php` avec le contenu suivant : 
+La plupart du temps, utiliser les filtres de l'entête de la vue en grille suffit, mais dans le cas où vous avez besoin d'un formulaire de filtrage séparé, vous pouvez facilement l'ajouter aussi. Vous pouvez créer une vue partielle `_search.php` avec le contenu suivant :
 
 ```php
 <?php
@@ -448,7 +448,7 @@ $query->andFilterWhere(['>=', 'creation_date', $this->createdFrom])
       ->andFilterWhere(['<=', 'creation_date', $this->createdTo]);
 ```
 
-Et ajoutez les champs représentatifs au formulaire de filtrage : 
+Et ajoutez les champs représentatifs au formulaire de filtrage :
 
 ```php
 <?= $form->field($model, 'creationFrom') ?>
@@ -470,9 +470,13 @@ $dataProvider = new ActiveDataProvider([
 
 // joingnez avec la relation nommée `author` qui est une relation avec la table `users`
 // et définissez l'alias à `author`
-$query->joinWith(['author' => function($query) { $query->from(['author' => 'users']); }]);
+$query->joinWith([
+    'author' => function ($query) {
+        $query->from(['author' => 'users']);
+    },
+]);
 // depuis la version 2.0.7, l'écriture ci-dessus peut être simplifiée en $query->joinWith('author AS author');
-// active le tri pour la colonne en relation 
+// active le tri pour la colonne en relation
 $dataProvider->sort->attributes['author.name'] = [
     'asc' => ['author.name' => SORT_ASC],
     'desc' => ['author.name' => SORT_DESC],
@@ -507,13 +511,13 @@ $query->andFilterWhere(['LIKE', 'author.name', $this->getAttribute('author.name'
 
 > Info: dans ce qui précède, nous utilisons la même chaîne de caractères pour le nom de la relation et pour l'alias de table ; cependant, lorsque votre nom de relation et votre alias diffèrent, vous devez faire attention aux endroits où vous utilisez l'alias et à ceux où vous utilisez le nom de la relation. Une règle simple pour cela est d'utiliser l'alias partout où cela sert à construire le requête de base de données et le nom de la relation dans toutes les autres définitions telles que `attributes()` et `rules()` etc.
 >
-> Par exemple, si vous utilisez l'alias `au` pour la table auteur en relation, l'instruction *joinWith* ressemble à ceci : 
+> Par exemple, si vous utilisez l'alias `au` pour la table auteur en relation, l'instruction *joinWith* ressemble à ceci :
 >
 > ```php
 > $query->joinWith(['author au']);
 > ```
 >
-> Il est également possible d'appeler simplement `$query->joinWith(['author']);` lorsque l'alias est défini dans la définition de la relation. 
+> Il est également possible d'appeler simplement `$query->joinWith(['author']);` lorsque l'alias est défini dans la définition de la relation.
 >
 > L'alias doit être utilisé dans la condition de filtrage mais le nom d'attribut reste le même :
 >
@@ -549,7 +553,7 @@ CREATE OR REPLACE VIEW vw_user_info AS
     WHERE user.id = user_profile.user_id
 ```
 
-Ensuite vous devez créer l'enregistrement actif qui représente cette vue : 
+Ensuite vous devez créer l'enregistrement actif qui représente cette vue :
 
 ```php
 
@@ -559,7 +563,6 @@ use yii\db\ActiveRecord;
 
 class UserView extends ActiveRecord
 {
-
     /**
      * @inheritdoc
      */
@@ -592,8 +595,6 @@ class UserView extends ActiveRecord
             // définissez vos étiquettes d'attribut ici
         ];
     }
-
-
 }
 ```
 
@@ -639,9 +640,9 @@ use yii\widgets\Pjax;
 use yii\grid\GridView;
 
 Pjax::begin([
-    // PJax options
+    // Pjax options
 ]);
-    Gridview::widget([
+    GridView::widget([
         // GridView options
     ]);
 Pjax::end();

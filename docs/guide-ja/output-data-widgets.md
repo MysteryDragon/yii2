@@ -13,7 +13,7 @@ DetailView は単一のデータ [[yii\widgets\DetailView::$model|モデル]] �
 
 モデルを標準的な書式で表示する場合 (例えば、全てのモデル属性をそれぞれテーブルの一行として表示する場合) に最も適しています。
 モデルは [[\yii\base\Model]] またはそのサブクラス、例えば [アクティブレコード](db-active-record.md) のインスタンスか、連想配列かのどちらかにすることが出来ます。
- 
+
 DetailView は [[yii\widgets\DetailView::$attributes]] プロパティを使って、モデルのどの属性が表示されるべきか、また、どういうフォーマットで表示されるべきかを決定します。
 利用できるフォーマットのオプションについては、[フォーマッタの節](output-formatting.md) を参照してください。
 
@@ -36,7 +36,7 @@ echo DetailView::widget([
 ]);
 ```
 
-[[yii\widgets\GridView|GridView]] が一組のモデルを処理するのとは異なって、
+[[yii\grid\GridView|GridView]] が一組のモデルを処理するのとは異なって、
 [[yii\widgets\DetailView|DetailView]] は一つのモデルしか処理しないということを覚えておいてください。
 表示すべきモデルはビューの変数としてアクセスできる `$model` 一つだけですから、たいていの場合、クロージャを使用する必要はありません。
 
@@ -94,7 +94,7 @@ use yii\helpers\HtmlPurifier;
 <div class="post">
     <h2><?= Html::encode($model->title) ?></h2>
 
-    <?= HtmlPurifier::process($model->text) ?>    
+    <?= HtmlPurifier::process($model->text) ?>
 </div>
 ```
 
@@ -543,7 +543,11 @@ $dataProvider = new ActiveDataProvider([
 
 // リレーション `author` を結合します。これはテーブル `users` に対するリレーションであり、
 // テーブルエイリアスを `author` とします。
-$query->joinWith(['author' => function($query) { $query->from(['author' => 'users']); }]);
+$query->joinWith([
+    'author' => function ($query) {
+        $query->from(['author' => 'users']);
+    },
+]);
 // バージョン 2.0.7 以降では、上の行は $query->joinWith('author AS author'); として単純化することが出来ます。
 // リレーションのカラムによる並べ替えを有効にします。
 $dataProvider->sort->attributes['author.name'] = [
@@ -635,7 +639,6 @@ use yii\db\ActiveRecord;
 
 class UserView extends ActiveRecord
 {
-
     /**
      * @inheritdoc
      */
@@ -668,8 +671,6 @@ class UserView extends ActiveRecord
             // ここで属性のラベルを定義
         ];
     }
-
-
 }
 ```
 
@@ -722,9 +723,9 @@ use yii\widgets\Pjax;
 use yii\grid\GridView;
 
 Pjax::begin([
-    // PJax のオプション
+    // Pjax のオプション
 ]);
-    Gridview::widget([
+    GridView::widget([
         // GridView のオプション
     ]);
 Pjax::end();

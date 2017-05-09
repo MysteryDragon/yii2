@@ -28,7 +28,7 @@ echo DetailView::widget([
         'description:html',                                // description attribute formatted as HTML
         [                                                  // the owner name of the model
             'label' => 'Owner',
-            'value' => $model->owner->name,            
+            'value' => $model->owner->name,
             'contentOptions' => ['class' => 'bg-red'],     // HTML attributes to customize value tag
             'captionOptions' => ['tooltip' => 'Tooltip'],  // HTML attributes to customize label tag
         ],
@@ -37,7 +37,7 @@ echo DetailView::widget([
 ]);
 ```
 
-Remember that unlike [[yii\widgets\GridView|GridView]] which processes a set of models,
+Remember that unlike [[yii\grid\GridView|GridView]] which processes a set of models,
 [[yii\widgets\DetailView|DetailView]] processes just one. So most of the time there is no need for using closure since
 `$model` is the only one model for display and available in view as a variable.
 
@@ -96,7 +96,7 @@ use yii\helpers\HtmlPurifier;
 <div class="post">
     <h2><?= Html::encode($model->title) ?></h2>
 
-    <?= HtmlPurifier::process($model->text) ?>    
+    <?= HtmlPurifier::process($model->text) ?>
 </div>
 ```
 
@@ -367,7 +367,7 @@ For filtering data, the GridView needs a [model](structure-models.md) that repre
 usually taken from the filter fields in the GridView table.
 A common practice when using [active records](db-active-record.md) is to create a search Model class
 that provides needed functionality (it can be generated for you by [Gii](start-gii.md)). This class defines the validation
-rules to show filter controls on the GridView table and to provide a `search()` method that will return the data 
+rules to show filter controls on the GridView table and to provide a `search()` method that will return the data
 provider with an adjusted query that processes the search criteria.
 
 To add the search capability for the `Post` model, we can create a `PostSearch` model like the following example:
@@ -384,7 +384,7 @@ use yii\data\ActiveDataProvider;
 class PostSearch extends Post
 {
     public function rules()
-    { 
+    {
         // only fields in rules() are searchable
         return [
             [['id'], 'integer'],
@@ -546,7 +546,11 @@ $dataProvider = new ActiveDataProvider([
 
 // join with relation `author` that is a relation to the table `users`
 // and set the table alias to be `author`
-$query->joinWith(['author' => function($query) { $query->from(['author' => 'users']); }]);
+$query->joinWith([
+    'author' => function ($query) {
+        $query->from(['author' => 'users']);
+    },
+]);
 // since version 2.0.7, the above line can be simplified to $query->joinWith('author AS author');
 // enable sorting for the related column
 $dataProvider->sort->attributes['author.name'] = [
@@ -641,7 +645,6 @@ use yii\db\ActiveRecord;
 
 class UserView extends ActiveRecord
 {
-
     /**
      * @inheritdoc
      */
@@ -674,8 +677,6 @@ class UserView extends ActiveRecord
             // define here your attribute labels
         ];
     }
-
-
 }
 ```
 
@@ -732,9 +733,9 @@ use yii\widgets\Pjax;
 use yii\grid\GridView;
 
 Pjax::begin([
-    // PJax options
+    // Pjax options
 ]);
-    Gridview::widget([
+    GridView::widget([
         // GridView options
     ]);
 Pjax::end();

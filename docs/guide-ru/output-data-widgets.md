@@ -30,7 +30,7 @@ echo DetailView::widget([
         'description:html',                                // description свойство, как HTML
         [                                                  // name свойство зависимой модели owner
             'label' => 'Owner',
-            'value' => $model->owner->name,            
+            'value' => $model->owner->name,
             'contentOptions' => ['class' => 'bg-red'],     // настройка HTML атрибутов для тега, соответсвующего value
             'captionOptions' => ['tooltip' => 'Tooltip'],  // настройка HTML атрибутов для тега, соответсвующего label
         ],
@@ -523,7 +523,11 @@ $dataProvider = new ActiveDataProvider([
 
 // присоединяем зависимость `author` которая является связью с таблицей `users`
 // и устанавливаем алиас таблицы в значение `author`
-$query->joinWith(['author' => function($query) { $query->from(['author' => 'users']); }]);
+$query->joinWith([
+    'author' => function ($query) {
+        $query->from(['author' => 'users']);
+    },
+]);
 // добавляем сортировку по колонке из зависимости
 $dataProvider->sort->attributes['author.name'] = [
     'asc' => ['author.name' => SORT_ASC],
@@ -533,8 +537,7 @@ $dataProvider->sort->attributes['author.name'] = [
 // ...
 ```
 
-Фильтрации также необходим вызов joinWith, как описано выше. Также необходимо определить для поиска столбец в атрибутах
-и правилах:
+Фильтрации также необходим вызов joinWith, как описано выше. Также необходимо определить для поиска столбец в атрибутах и правилах:
 
 ```php
 public function attributes()
@@ -617,7 +620,6 @@ use yii\db\ActiveRecord;
 
 class UserView extends ActiveRecord
 {
-
     /**
      * @inheritdoc
      */
