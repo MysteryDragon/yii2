@@ -796,26 +796,28 @@ class BaseConsole
         );
         $error = null;
 
-        top:
-        $input = $options['default']
-            ? static::input("$text [" . $options['default'] . '] ')
-            : static::input("$text ");
+        while (true) {
+            $input = $options['default']
+                ? static::input("$text [" . $options['default'] . '] ')
+                : static::input("$text ");
 
-        if ($input === '') {
-            if (isset($options['default'])) {
-                $input = $options['default'];
-            } elseif ($options['required']) {
+            if ($input === '') {
+                if (isset($options['default'])) {
+                    $input = $options['default'];
+                    break;
+                }
+                if ($options['required']) {
+                    static::output($options['error']);
+                }
+            } elseif ($options['pattern'] && !preg_match($options['pattern'], $input)) {
                 static::output($options['error']);
-                goto top;
+            } elseif ($options['validator'] &&
+                !call_user_func_array($options['validator'], [$input, &$error])
+            ) {
+                static::output(isset($error) ? $error : $options['error']);
+            } else {
+                break;
             }
-        } elseif ($options['pattern'] && !preg_match($options['pattern'], $input)) {
-            static::output($options['error']);
-            goto top;
-        } elseif ($options['validator'] &&
-            !call_user_func_array($options['validator'], [$input, &$error])
-        ) {
-            static::output(isset($error) ? $error : $options['error']);
-            goto top;
         }
 
         return $input;
@@ -869,17 +871,19 @@ class BaseConsole
      */
     public static function select($prompt, $options = [])
     {
-        top:
-        static::stdout("$prompt [" . implode(',', array_keys($options)) . ',?]: ');
-        $input = static::stdin();
-        if ($input === '?') {
-            foreach ($options as $key => $value) {
-                static::output(" $key - $value");
+        while (true) {
+            static::stdout("$prompt [" . implode(',', array_keys($options)) . ',?]: ');
+            $input = static::stdin();
+            if ($input === '?') {
+                foreach ($options as $key => $value) {
+                    static::output(" $key - $value");
+                }
+                static::output(' ? - Show help');
+                continue;
             }
-            static::output(' ? - Show help');
-            goto top;
-        } elseif (!array_key_exists($input, $options)) {
-            goto top;
+            if (array_key_exists($input, $options)) {
+                break;
+            }
         }
 
         return $input;

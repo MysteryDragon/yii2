@@ -144,4 +144,44 @@ class ConsoleTest extends TestCase
     {
         $this->assertEquals($html, Console::ansiToHtml($ansi));
     }
+
+    public function testPrompt()
+    {
+        if (getenv('TRAVIS') == 'true') {
+            $this->markTestSkipped('User prompt requests are unacceptable in auto-testing.');
+        }
+
+        $this->assertEquals('qwe', Console::prompt(PHP_EOL . 'Assert "qwe":'));
+
+        $this->assertEquals('myDefault', Console::prompt('Assert default value, just press Enter:', ['default' => 'myDefault']));
+
+        $this->assertNotEmpty(Console::prompt('Enter something:', ['required' => true]));
+
+        $this->assertStringMatchesFormat('%d', Console::prompt('Enter any number:', ['pattern' => '/^\d+$/u']));
+
+        $this->assertStringMatchesFormat('%d', Console::prompt('Enter another number:', ['validator' => function ($value, &$error) {
+            if (!preg_match('/^\d+$/u', $value)) {
+                $error = 'Number expected!';
+
+                return false;
+            }
+
+            return true;
+        }]));
+    }
+
+    public function testSelect()
+    {
+        if (getenv('TRAVIS') == 'true') {
+            $this->markTestSkipped('User select requests are unacceptable in auto-testing.');
+        }
+
+        $options = [
+            'c' => 'cat',
+            'd' => 'dog',
+            't' => 'tiger',
+        ];
+
+        $this->assertContains(Console::select('Choose option:', $options), array_keys($options));
+    }
 }
