@@ -23,6 +23,70 @@ class ConsoleTest extends TestCase
 
         // destroy application, Helper must work without Yii::$app
         $this->destroyApplication();
+
+        $this->setupStreams();
+    }
+
+    /**
+     * Set up streams for Console helper stub
+     */
+    protected function setupStreams()
+    {
+        ConsoleStub::$inputStream = fopen('php://memory', 'w+');
+        ConsoleStub::$outputStream = fopen('php://memory', 'w+');
+        ConsoleStub::$errorStream = fopen('php://memory', 'w+');
+    }
+
+    /**
+     * Clean streams in Console helper stub
+     */
+    protected function truncateStreams()
+    {
+        ftruncate(ConsoleStub::$inputStream, 0);
+        ftruncate(ConsoleStub::$outputStream, 0);
+        ftruncate(ConsoleStub::$errorStream, 0);
+    }
+
+    /**
+     * Read data from Console helper output stream
+     *
+     * @return string
+     */
+    protected function readFromOutput()
+    {
+        rewind(ConsoleStub::$outputStream);
+
+        return rtrim(fread(ConsoleStub::$outputStream, 1024), PHP_EOL);
+    }
+
+    /**
+     * Write data to Console helper input stream
+     *
+     * @param string $data entering data
+     * @return void
+     */
+    protected function writeIntoInput($data)
+    {
+        fwrite(ConsoleStub::$inputStream, $data . PHP_EOL);
+
+        rewind(ConsoleStub::$inputStream);
+    }
+
+    /**
+     * Execute some test code with enabled `ConsoleStub::$allowBlankInput`
+     *
+     * @param callable $function executing function
+     * @return void
+     */
+    protected function runWithAllowedBlankInput($function)
+    {
+        $pastValue = ConsoleStub::$allowBlankInput;
+
+        ConsoleStub::$allowBlankInput = true;
+
+        call_user_func($function);
+
+        ConsoleStub::$allowBlankInput = $pastValue;
     }
 
     public function testStripAnsiFormat()
@@ -143,5 +207,134 @@ class ConsoleTest extends TestCase
     public function testAnsi2Html($ansi, $html)
     {
         $this->assertEquals($html, Console::ansiToHtml($ansi));
+    }
+
+    /**
+     * @covers \yii\helpers\BaseConsole::prompt()
+     */
+    public function testPrompt()
+    {
+        $this->writeIntoInput('smth');
+        ConsoleStub::prompt('Testing prompt');
+        $this->assertEquals('Testing prompt ', $this->readFromOutput());
+        $this->truncateStreams();
+
+        $this->writeIntoInput('smth');
+        ConsoleStub::prompt('Testing prompt with default', ['default' => 'myDefault']);
+        $this->assertEquals('Testing prompt with default [myDefault] ', $this->readFromOutput());
+        $this->truncateStreams();
+
+        $this->writeIntoInput('cat');
+        $result = ConsoleStub::prompt('Check clear input');
+        $this->assertEquals('cat', $result);
+        $this->truncateStreams();
+
+        $this->runWithAllowedBlankInput(function () {
+            $this->writeIntoInput('');
+            $result = ConsoleStub::prompt('No input with default', ['default' => 'x']);
+            $this->assertEquals('x', $result);
+            $this->truncateStreams();
+
+            $this->writeIntoInput(PHP_EOL . 'smth');
+            $result = ConsoleStub::prompt('SmthRequired', ['required' => true]);
+            $this->assertEquals('SmthRequired Invalid input.' . PHP_EOL . 'SmthRequired ', $this->readFromOutput());
+            $this->truncateStreams();
+        });
+
+        $this->writeIntoInput('cat' . PHP_EOL . '15');
+        $result = ConsoleStub::prompt('SmthDigit', ['pattern' => '/^\d+$/']);
+        $this->assertEquals('SmthDigit Invalid input.' . PHP_EOL . 'SmthDigit ', $this->readFromOutput());
+        $this->truncateStreams();
+
+        $this->writeIntoInput('cat' . PHP_EOL . '15');
+        $result = ConsoleStub::prompt('SmthNumeric', ['validator' => function ($value, &$error) {
+            return is_numeric($value);
+        }]);
+        $this->assertEquals('SmthNumeric Invalid input.' . PHP_EOL . 'SmthNumeric ', $this->readFromOutput());
+        $this->truncateStreams();
+
+        $this->writeIntoInput('cat' . PHP_EOL . '15');
+        $result = ConsoleStub::prompt('SmthNumeric', ['validator' => function ($value, &$error) {
+            if (!$response = is_numeric($value)) {
+                $error = 'MyCustomError';
+            }
+
+            return $response;
+        }]);
+        $this->assertEquals('SmthNumeric MyCustomError' . PHP_EOL . 'SmthNumeric ', $this->readFromOutput());
+        $this->truncateStreams();
+    }
+
+    /**
+     * @covers \yii\helpers\BaseConsole::confirm()
+     */
+    public function testConfirm()
+    {
+        $this->writeIntoInput('y');
+        ConsoleStub::confirm('Are you sure?');
+        $this->assertEquals('Are you sure? (yes|no) [no]:', $this->readFromOutput());
+        $this->truncateStreams();
+
+        $this->writeIntoInput('y');
+        ConsoleStub::confirm('Are you sure?', true);
+        $this->assertEquals('Are you sure? (yes|no) [yes]:', $this->readFromOutput());
+        $this->truncateStreams();
+
+        $this->writeIntoInput('y');
+        ConsoleStub::confirm('Are you sure?', false);
+        $this->assertEquals('Are you sure? (yes|no) [no]:', $this->readFromOutput());
+        $this->truncateStreams();
+
+        foreach ([
+            'y' => true,
+            'Y' => true,
+            'yes' => true,
+            'YeS' => true,
+            'n' => false,
+            'N' => false,
+            'no' => false,
+            'NO' => false,
+            'WHAT?!' . PHP_EOL . 'yes' => true,
+        ] as $currInput => $currAssertion) {
+            $this->writeIntoInput($currInput);
+            $result = ConsoleStub::confirm('Are you sure?');
+            $this->assertEquals($currAssertion, $result, $currInput);
+            $this->truncateStreams();
+        }
+    }
+
+    /**
+     * @covers \yii\helpers\BaseConsole::select()
+     */
+    public function testSelect()
+    {
+        $options = [
+            'c' => 'cat',
+            'd' => 'dog',
+            'm' => 'mouse',
+        ];
+
+        $this->writeIntoInput('c');
+        $result = ConsoleStub::select('Usual behavior', $options);
+        $this->assertEquals('Usual behavior [c,d,m,?]: ', $this->readFromOutput());
+        $this->assertEquals('c', $result);
+        $this->truncateStreams();
+
+        $this->writeIntoInput('?' . PHP_EOL . 'm');
+        $result = ConsoleStub::select('Smth', $options);
+        $this->assertEquals(
+            'Smth [c,d,m,?]: '
+                . ' c - cat'
+                . PHP_EOL
+                . ' d - dog'
+                . PHP_EOL
+                . ' m - mouse'
+                . PHP_EOL
+                . ' ? - Show help'
+                . PHP_EOL
+                . 'Smth [c,d,m,?]: ',
+            $this->readFromOutput()
+        );
+        $this->truncateStreams();
     }
 }
