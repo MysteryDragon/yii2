@@ -33,11 +33,6 @@ class ConsoleStub extends BaseConsole
      */
     public static $errorStream = \STDERR;
 
-    /**
-     * @var bool when it's possible that user print nothing
-     */
-    public static $allowBlankInput = false;
-
 
     /**
      * @inheritdoc
@@ -47,11 +42,12 @@ class ConsoleStub extends BaseConsole
         if (self::$inputStream !== \STDIN) {
             // emulating user input
             // real STDIN waits until user prompts something,
-            // but other stream can easily go away with blank string
+            // but other stream can easily go away with nothing
 
-            $response = $raw ? fgets(self::$inputStream) : rtrim(fgets(self::$inputStream), PHP_EOL);
+            $input = fgets(self::$inputStream);
+            $response = $raw ? $input : rtrim($input, PHP_EOL);
 
-            if ($response === '' && !self::$allowBlankInput) {
+            if (empty($input)) {
                 throw new Exception(__METHOD__ . ' didn\'t receive user data');
             }
 

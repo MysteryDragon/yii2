@@ -56,7 +56,7 @@ class ConsoleTest extends TestCase
     {
         rewind(ConsoleStub::$outputStream);
 
-        return rtrim(fread(ConsoleStub::$outputStream, 1024), PHP_EOL);
+        return fread(ConsoleStub::$outputStream, 1024);
     }
 
     /**
@@ -70,23 +70,6 @@ class ConsoleTest extends TestCase
         fwrite(ConsoleStub::$inputStream, $data . PHP_EOL);
 
         rewind(ConsoleStub::$inputStream);
-    }
-
-    /**
-     * Execute some test code with enabled `ConsoleStub::$allowBlankInput`
-     *
-     * @param callable $function executing function
-     * @return void
-     */
-    protected function runWithAllowedBlankInput($function)
-    {
-        $pastValue = ConsoleStub::$allowBlankInput;
-
-        ConsoleStub::$allowBlankInput = true;
-
-        call_user_func($function);
-
-        ConsoleStub::$allowBlankInput = $pastValue;
     }
 
     public function testStripAnsiFormat()
@@ -229,17 +212,15 @@ class ConsoleTest extends TestCase
         $this->assertEquals('cat', $result);
         $this->truncateStreams();
 
-        $this->runWithAllowedBlankInput(function () {
-            $this->writeIntoInput('');
-            $result = ConsoleStub::prompt('No input with default', ['default' => 'x']);
-            $this->assertEquals('x', $result);
-            $this->truncateStreams();
+        $this->writeIntoInput('');
+        $result = ConsoleStub::prompt('No input with default', ['default' => 'x']);
+        $this->assertEquals('x', $result);
+        $this->truncateStreams();
 
-            $this->writeIntoInput(PHP_EOL . 'smth');
-            $result = ConsoleStub::prompt('SmthRequired', ['required' => true]);
-            $this->assertEquals('SmthRequired Invalid input.' . PHP_EOL . 'SmthRequired ', $this->readFromOutput());
-            $this->truncateStreams();
-        });
+        $this->writeIntoInput(PHP_EOL . 'smth');
+        $result = ConsoleStub::prompt('SmthRequired', ['required' => true]);
+        $this->assertEquals('SmthRequired Invalid input.' . PHP_EOL . 'SmthRequired ', $this->readFromOutput());
+        $this->truncateStreams();
 
         $this->writeIntoInput('cat' . PHP_EOL . '15');
         $result = ConsoleStub::prompt('SmthDigit', ['pattern' => '/^\d+$/']);
