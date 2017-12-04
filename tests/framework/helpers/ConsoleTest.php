@@ -48,26 +48,34 @@ class ConsoleTest extends TestCase
     }
 
     /**
-     * Read data from Console helper output stream
+     * Read data from Console helper stream, defaults to output stream
      *
      * @return string
      */
-    protected function readFromOutput()
+    protected function readOutput($stream = null)
     {
-        rewind(ConsoleStub::$outputStream);
+        if ($stream === null) {
+            $stream = ConsoleStub::$outputStream;
+        }
 
-        return fread(ConsoleStub::$outputStream, 1024);
+        rewind($stream);
+
+        $output = '';
+
+        while (!feof($stream) && ($buffer = fread($stream, 1024)) !== false) {
+            $output .= $buffer;
+        }
+
+        return $output;
     }
 
     /**
-     * Write data to Console helper input stream
-     *
-     * @param string $data entering data
-     * @return void
+     * Write passed arguments to Console helper input stream and rewind the position
+     * of a input stream pointer
      */
-    protected function writeIntoInput($data)
+    protected function sendInput()
     {
-        fwrite(ConsoleStub::$inputStream, $data . PHP_EOL);
+        fwrite(ConsoleStub::$inputStream, implode(PHP_EOL, func_get_args()) . PHP_EOL);
 
         rewind(ConsoleStub::$inputStream);
     }
@@ -193,56 +201,131 @@ class ConsoleTest extends TestCase
     }
 
     /**
+     * @covers \yii\helpers\BaseConsole::input()
+     */
+    public function testInput()
+    {
+        $this->sendInput('test1');
+        $result = ConsoleStub::input();
+        $this->assertEquals('test1', $result);
+        $this->assertEmpty($this->readOutput());
+        $this->truncateStreams();
+
+        $this->sendInput('test2');
+        $result = ConsoleStub::input('MyPrompt');
+        $this->assertEquals('test2', $result);
+        $this->assertEquals('MyPrompt', $this->readOutput());
+        $this->truncateStreams();
+    }
+
+    /**
+     * @covers \yii\helpers\BaseConsole::output()
+     */
+    public function testOutput()
+    {
+        $result = ConsoleStub::output('Smth');
+        $this->assertEquals('Smth' . PHP_EOL, $this->readOutput());
+        $this->assertEmpty($this->readOutput(ConsoleStub::$errorStream));
+    }
+
+    /**
+     * @covers \yii\helpers\BaseConsole::error()
+     */
+    public function testError()
+    {
+        $result = ConsoleStub::error('SomeError');
+        $this->assertEquals('SomeError' . PHP_EOL, $this->readOutput(ConsoleStub::$errorStream));
+        $this->assertEmpty($this->readOutput());
+    }
+
+    /**
      * @covers \yii\helpers\BaseConsole::prompt()
      */
     public function testPrompt()
     {
-        $this->writeIntoInput('smth');
+        // testing output variations
+
+        $this->sendInput('smth');
         ConsoleStub::prompt('Testing prompt');
-        $this->assertEquals('Testing prompt ', $this->readFromOutput());
+        $this->assertEquals('Testing prompt ', $this->readOutput());
         $this->truncateStreams();
 
-        $this->writeIntoInput('smth');
+        $this->sendInput('smth');
         ConsoleStub::prompt('Testing prompt with default', ['default' => 'myDefault']);
-        $this->assertEquals('Testing prompt with default [myDefault] ', $this->readFromOutput());
+        $this->assertEquals('Testing prompt with default [myDefault] ', $this->readOutput());
         $this->truncateStreams();
 
-        $this->writeIntoInput('cat');
+        // testing base successful scenario
+        $this->sendInput('cat');
         $result = ConsoleStub::prompt('Check clear input');
         $this->assertEquals('cat', $result);
         $this->truncateStreams();
 
-        $this->writeIntoInput('');
+        // testing applying default value ("default" param)
+        $this->sendInput('');
         $result = ConsoleStub::prompt('No input with default', ['default' => 'x']);
         $this->assertEquals('x', $result);
         $this->truncateStreams();
 
-        $this->writeIntoInput(PHP_EOL . 'smth');
+        // testing requiring value ("required" param)
+        $this->sendInput('', 'smth');
         $result = ConsoleStub::prompt('SmthRequired', ['required' => true]);
-        $this->assertEquals('SmthRequired Invalid input.' . PHP_EOL . 'SmthRequired ', $this->readFromOutput());
+        $this->assertEquals('SmthRequired Invalid input.' . PHP_EOL . 'SmthRequired ', $this->readOutput());
+        $this->assertEquals('smth', $result);
         $this->truncateStreams();
 
-        $this->writeIntoInput('cat' . PHP_EOL . '15');
+        // testing custom error text ("error" param)
+        $this->sendInput('', 'smth');
+        $result = ConsoleStub::prompt('TestCustomError', ['required' => true, 'error' => 'ThisOne']);
+        $this->assertEquals('TestCustomError ThisOne' . PHP_EOL . 'TestCustomError ', $this->readOutput());
+        $this->assertEquals('smth', $result);
+        $this->truncateStreams();
+
+        // testing pattern check ("pattern" param)
+        $this->sendInput('cat', '15');
         $result = ConsoleStub::prompt('SmthDigit', ['pattern' => '/^\d+$/']);
-        $this->assertEquals('SmthDigit Invalid input.' . PHP_EOL . 'SmthDigit ', $this->readFromOutput());
+        $this->assertEquals('SmthDigit Invalid input.' . PHP_EOL . 'SmthDigit ', $this->readOutput());
+        $this->assertEquals('15', $result);
         $this->truncateStreams();
 
-        $this->writeIntoInput('cat' . PHP_EOL . '15');
+        // testing custom callable check ("validator" param)
+        $this->sendInput('cat', '15');
         $result = ConsoleStub::prompt('SmthNumeric', ['validator' => function ($value, &$error) {
             return is_numeric($value);
         }]);
-        $this->assertEquals('SmthNumeric Invalid input.' . PHP_EOL . 'SmthNumeric ', $this->readFromOutput());
+        $this->assertEquals('SmthNumeric Invalid input.' . PHP_EOL . 'SmthNumeric ', $this->readOutput());
+        $this->assertEquals('15', $result);
         $this->truncateStreams();
 
-        $this->writeIntoInput('cat' . PHP_EOL . '15');
-        $result = ConsoleStub::prompt('SmthNumeric', ['validator' => function ($value, &$error) {
-            if (!$response = is_numeric($value)) {
-                $error = 'MyCustomError';
-            }
+        // testing custom callable check with custom error message
+        $this->sendInput('cat', '15');
+        $result = ConsoleStub::prompt('SmthNumeric', [
+            'validator' => function ($value, &$error) {
+                if (!$response = is_numeric($value)) {
+                    $error = 'RealCustomError';
+                }
 
-            return $response;
-        }]);
-        $this->assertEquals('SmthNumeric MyCustomError' . PHP_EOL . 'SmthNumeric ', $this->readFromOutput());
+                return $response;
+            },
+            'error' => 'ExternalError',
+        ]);
+        $this->assertEquals('SmthNumeric RealCustomError' . PHP_EOL . 'SmthNumeric ', $this->readOutput());
+        $this->assertEquals('15', $result);
+        $this->truncateStreams();
+
+        // testing combined options
+        $this->sendInput('14', '15');
+        $result = ConsoleStub::prompt('Combined', [
+            'required' => true,
+            'default' => 'kraken',
+            'pattern' => '/^\d+$/',
+            'validator' => function ($value, &$error) {
+                return $value == 15;
+            },
+            'error' => 'CustomError',
+        ]);
+        $this->assertEquals('Combined [kraken] CustomError' . PHP_EOL . 'Combined [kraken] ', $this->readOutput());
+        $this->assertEquals('15', $result);
         $this->truncateStreams();
     }
 
@@ -251,19 +334,21 @@ class ConsoleTest extends TestCase
      */
     public function testConfirm()
     {
-        $this->writeIntoInput('y');
+        $this->sendInput('y');
         ConsoleStub::confirm('Are you sure?');
-        $this->assertEquals('Are you sure? (yes|no) [no]:', $this->readFromOutput());
+        $this->assertEquals('Are you sure? (yes|no) [no]:', $this->readOutput());
         $this->truncateStreams();
 
-        $this->writeIntoInput('y');
-        ConsoleStub::confirm('Are you sure?', true);
-        $this->assertEquals('Are you sure? (yes|no) [yes]:', $this->readFromOutput());
+        $this->sendInput('');
+        $result = ConsoleStub::confirm('Are you sure?', true);
+        $this->assertEquals('Are you sure? (yes|no) [yes]:', $this->readOutput());
+        $this->assertTrue($result);
         $this->truncateStreams();
 
-        $this->writeIntoInput('y');
-        ConsoleStub::confirm('Are you sure?', false);
-        $this->assertEquals('Are you sure? (yes|no) [no]:', $this->readFromOutput());
+        $this->sendInput('');
+        $result = ConsoleStub::confirm('Are you sure?', false);
+        $this->assertEquals('Are you sure? (yes|no) [no]:', $this->readOutput());
+        $this->assertFalse($result);
         $this->truncateStreams();
 
         foreach ([
@@ -277,7 +362,7 @@ class ConsoleTest extends TestCase
             'NO' => false,
             'WHAT?!' . PHP_EOL . 'yes' => true,
         ] as $currInput => $currAssertion) {
-            $this->writeIntoInput($currInput);
+            $this->sendInput($currInput);
             $result = ConsoleStub::confirm('Are you sure?');
             $this->assertEquals($currAssertion, $result, $currInput);
             $this->truncateStreams();
@@ -295,16 +380,22 @@ class ConsoleTest extends TestCase
             'm' => 'mouse',
         ];
 
-        $this->writeIntoInput('c');
+        $this->sendInput('c');
         $result = ConsoleStub::select('Usual behavior', $options);
-        $this->assertEquals('Usual behavior [c,d,m,?]: ', $this->readFromOutput());
+        $this->assertEquals('Usual behavior [c,d,m,?]: ', $this->readOutput());
         $this->assertEquals('c', $result);
         $this->truncateStreams();
 
-        $this->writeIntoInput('?' . PHP_EOL . 'm');
-        $result = ConsoleStub::select('Smth', $options);
+        $this->sendInput('x', 'd');
+        $result = ConsoleStub::select('Wrong character', $options);
+        $this->assertEquals('Wrong character [c,d,m,?]: Wrong character [c,d,m,?]: ', $this->readOutput());
+        $this->assertEquals('d', $result);
+        $this->truncateStreams();
+
+        $this->sendInput('?', 'm');
+        $result = ConsoleStub::select('Using help', $options);
         $this->assertEquals(
-            'Smth [c,d,m,?]: '
+            'Using help [c,d,m,?]: '
                 . ' c - cat'
                 . PHP_EOL
                 . ' d - dog'
@@ -313,8 +404,8 @@ class ConsoleTest extends TestCase
                 . PHP_EOL
                 . ' ? - Show help'
                 . PHP_EOL
-                . 'Smth [c,d,m,?]: ',
-            $this->readFromOutput()
+                . 'Using help [c,d,m,?]: ',
+            $this->readOutput()
         );
         $this->truncateStreams();
     }
