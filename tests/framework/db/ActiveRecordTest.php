@@ -1229,6 +1229,24 @@ abstract class ActiveRecordTest extends DatabaseTestCase
         $record->save(false);
     }
 
+    public function testOptimisticLockAlternative()
+    {
+        /* @var $sameRecord Document */
+
+        $sameRecord = Document::findOne(1);
+
+        /* @var $record Document */
+
+        $record = Document::findOne(1);
+        $record->content = 'New Content';
+        $record->save(false);
+        $this->assertEquals(1, $record->version);
+
+        $sameRecord->content = 'Replacing content';
+        $this->expectException('yii\db\StaleObjectException');
+        $sameRecord->save(false);
+    }
+
     public function testPopulateWithoutPk()
     {
         // tests with single pk asArray
