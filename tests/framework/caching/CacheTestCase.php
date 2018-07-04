@@ -213,6 +213,29 @@ abstract class CacheTestCase extends TestCase
         $this->assertFalse($cache->get('expire_testa'));
     }
 
+    public function testDisabledCache()
+    {
+        $cache = $this->getCacheInstance();
+
+        $this->assertTrue($cache->set('expire_test', 'expire_test', -1));
+        $this->assertFalse($cache->get('expire_test'));
+
+        $this->assertTrue($cache->add('expire_test', 'expire_testa', -1));
+        $this->assertFalse($cache->get('expire_test'));
+
+        $this->assertTrue($cache->multiSet([
+            'expire_test' => 'expire_test',
+            'another_expire_test' => 'another_expire_test',
+        ], -1));
+        $this->assertEquals([], $cache->multiGet(['expire_test', 'another_expire_test']));
+
+        $this->assertTrue($cache->multiAdd([
+            'expire_testa' => 'expire_testa',
+            'another_expire_testa' => 'another_expire_testa',
+        ], -1));
+        $this->assertEquals([], $cache->multiGet(['expire_testa', 'another_expire_testa']));
+    }
+
     public function testAdd()
     {
         $cache = $this->prepare();
