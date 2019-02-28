@@ -18,7 +18,7 @@ class CustomDebugInfo
     public $unitPrice;
 
     /**
-     * @see https://secure.php.net/manual/en/language.oop5.magic.php#language.oop5.magic.debuginfo
+     * @see https://php.net/manual/en/language.oop5.magic.php#language.oop5.magic.debuginfo
      *
      * @return array
      */

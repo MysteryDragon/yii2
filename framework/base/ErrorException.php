@@ -32,7 +32,7 @@ class ErrorException extends \ErrorException
 
     /**
      * Constructs the exception.
-     * @link https://secure.php.net/manual/en/errorexception.construct.php
+     * @link https://php.net/manual/en/errorexception.construct.php
      * @param $message [optional]
      * @param $code [optional]
      * @param $severity [optional]

@@ -37,7 +37,7 @@ class ServeController extends Controller
     public $docroot = '@app/web';
     /**
      * @var string path to router script.
-     * See https://secure.php.net/manual/en/features.commandline.webserver.php
+     * See https://php.net/manual/en/features.commandline.webserver.php
      */
     public $router;
 

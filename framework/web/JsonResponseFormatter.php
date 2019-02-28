@@ -67,7 +67,7 @@ class JsonResponseFormatter extends Component implements ResponseFormatterInterf
     public $useJsonp = false;
     /**
      * @var int the encoding options passed to [[Json::encode()]]. For more details please refer to
-     * <https://secure.php.net/manual/en/function.json-encode.php>.
+     * <https://php.net/manual/en/function.json-encode.php>.
      * Default is `JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE`.
      * This property has no effect, when [[useJsonp]] is `true`.
      * @since 2.0.7
