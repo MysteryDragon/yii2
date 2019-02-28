@@ -28,15 +28,15 @@ Yii 2.0 wymaga PHP w wersji 5.4 lub nowszej, która została znacząco ulepszona
 Z tego też powodu już na poziomie samego języka pojawiło się sporo różnic, na które należy zwrócić uwagę.
 Poniżej znajdziesz krótkie podsumowanie głównych różnic dotyczących PHP:
 
-- [Przestrzenie nazw](https://secure.php.net/manual/pl/language.namespaces.php).
-- [Funkcje anonimowe](https://secure.php.net/manual/pl/functions.anonymous.php).
+- [Przestrzenie nazw](https://php.net/manual/pl/language.namespaces.php).
+- [Funkcje anonimowe](https://php.net/manual/pl/functions.anonymous.php).
 - Skrócona składnia zapisu tablic `[...elementy...]` używana zamiast `array(...elementy...)`.
 - Krótkie tagi echo `<?=` używane w plikach widoków. Można ich używać bezpiecznie, począwszy od PHP 5.4.
-- [Klasy i interfejsy SPL](https://secure.php.net/manual/pl/book.spl.php).
-- [Opóźnione statyczne wiązania](https://secure.php.net/manual/pl/language.oop5.late-static-bindings.php).
-- [Data i czas](https://secure.php.net/manual/pl/book.datetime.php).
-- [Traity](https://secure.php.net/manual/pl/language.oop5.traits.php).
-- [Rozszerzenie intl](https://secure.php.net/manual/pl/book.intl.php). Yii 2.0 korzysta z rozszerzenia PHP `intl` do wsparcia obsługi internacjonalizacji.
+- [Klasy i interfejsy SPL](https://php.net/manual/pl/book.spl.php).
+- [Opóźnione statyczne wiązania](https://php.net/manual/pl/language.oop5.late-static-bindings.php).
+- [Data i czas](https://php.net/manual/pl/book.datetime.php).
+- [Traity](https://php.net/manual/pl/language.oop5.traits.php).
+- [Rozszerzenie intl](https://php.net/manual/pl/book.intl.php). Yii 2.0 korzysta z rozszerzenia PHP `intl` do wsparcia obsługi internacjonalizacji.
 
 
 Przestrzeń nazw
